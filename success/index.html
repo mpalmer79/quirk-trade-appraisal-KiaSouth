@@ -6,7 +6,15 @@
   <title data-i18n="successTitle">Thanks! - Quirk Kia South</title>
   <link rel="stylesheet" href="/assets/styles.css" />
 </head>
-<body>
+<body
+  style="
+    min-height:100vh;
+    /* Subtle watermark background */
+    background:
+      linear-gradient(rgba(0,0,0,.18), rgba(0,0,0,.18)),
+      url('/assets/quirk-lot.png') center / cover no-repeat fixed;
+  "
+>
   <main style="max-width:720px;margin:40px auto;background:#fff;padding:24px;
                border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,0.1)">
     <h1 style="text-align:center;margin:0 0 10px;color:#004a2f" data-i18n="successHeading">
@@ -21,7 +29,9 @@
         Submit another vehicle
       </a>
       <a class="ghost-btn" href="https://www.quirkkiasouth.com" target="_blank" 
-         rel="noopener noreferrer" style="text-decoration:none" data-i18n="backToDealer"> Back to Quirk Kia South </a>
+         rel="noopener noreferrer" style="text-decoration:none" data-i18n="backToDealer">
+        Back to Quirk Kia South
+      </a>
     </div>
 
     <!-- Logo inside same white card -->
