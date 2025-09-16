@@ -6,7 +6,7 @@ import sg from "@sendgrid/mail";
 // SENDGRID_API_KEY: Your SendGrid API key.
 // FROM_EMAIL: A verified sender email address in your SendGrid account.
 // TO_EMAIL: A comma-separated list of recipient email addresses.
-const TO_EMAILS = (process.env.TO_EMAIL || "steve@quirkcars.com,gmcintosh@quirkcars.com,lmendez@quirkcars.com").split(',');
+const TO_EMAILS = (process.env.TO_EMAIL || "steve@quirkcars.com").split(',');
 const FROM_EMAIL = process.env.FROM_EMAIL;
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 
@@ -47,8 +47,7 @@ export async function handler(event) {
       attachments = await processAttachments(files);
     } catch (error) {
       console.error("Failed to process attachments:", error);
-      // Decide if you still want to send the email without attachments
-      // For now, we'll continue and just log the error.
+      // Continue without attachments
     }
   }
 
@@ -67,7 +66,6 @@ export async function handler(event) {
       attachments: attachments.length ? attachments : undefined,
     });
   } catch (error) {
-    // Log detailed error information from SendGrid
     console.error("SendGrid API Error:", JSON.stringify(error.response?.body || error.message, null, 2));
     return { statusCode: 502, body: "Failed to send email via provider." };
   }
@@ -81,6 +79,8 @@ export async function handler(event) {
 
 /**
  * Creates the subject, HTML body, and text body for the email.
+ * Ensures "SalesConsultant" (from form field `salesConsultant`) is displayed
+ * as the final row in the email, matching other projects.
  * @param {object} data - The form submission data.
  * @returns {{subject: string, htmlBody: string, textBody: string}}
  */
@@ -89,30 +89,58 @@ function createEmailContent(data) {
   const rows = [];
   const hasVal = (v) => v !== undefined && v !== null && String(v).trim() !== "";
 
+  // capture Sales Consultant separately so we can force it to the bottom
+  let salesConsultantVal = null;
+
   // Sort keys for consistent email layout
   Object.keys(data).sort().forEach(k => {
     if (included.has(k)) return;
+
     const v = data[k];
-    if (hasVal(v)) {
-      rows.push([k, Array.isArray(v) ? v.join(", ") : String(v)]);
+    if (!hasVal(v)) return;
+
+    // Normalize key for matching
+    const keyNorm = k.toLowerCase().replace(/\s|_/g, "");
+    if (keyNorm === "salesconsultant") {
+      salesConsultantVal = Array.isArray(v) ? v.join(", ") : String(v);
+      return; // don't put it into the general rows
     }
+
+    rows.push([k, Array.isArray(v) ? v.join(", ") : String(v)]);
   });
 
-  const htmlEscape = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const htmlEscape = (s) =>
+    String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-  const htmlBody = `
-    <h2 style="margin:0 0 12px 0;font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;">New Trade-In Lead</h2>
-    <table cellpadding="6" cellspacing="0" border="0" style="border-collapse:collapse;">
-      ${rows.map(([k, v]) => `
+  const tableRowsHtml = rows.map(([k, v]) => `
         <tr>
           <th align="left" style="text-transform:capitalize;font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;font-size:14px;color:#111827;padding:6px 10px 6px 0;">${htmlEscape(k)}</th>
           <td style="font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;font-size:14px;color:#111827;padding:6px 0;">${htmlEscape(v)}</td>
         </tr>
-      `).join("")}
+      `).join("");
+
+  const salesConsultantRowHtml = hasVal(salesConsultantVal)
+    ? `
+        <tr>
+          <th align="left" style="text-transform:none;font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;font-size:14px;color:#111827;padding:6px 10px 6px 0;">SalesConsultant</th>
+          <td style="font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;font-size:14px;color:#111827;padding:6px 0;">${htmlEscape(salesConsultantVal)}</td>
+        </tr>
+      `
+    : "";
+
+  const htmlBody = `
+    <h2 style="margin:0 0 12px 0;font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;">New Trade-In Lead</h2>
+    <table cellpadding="6" cellspacing="0" border="0" style="border-collapse:collapse;">
+      ${tableRowsHtml}
+      ${salesConsultantRowHtml}
     </table>
   `;
 
-  const textBody = rows.map(([k, v]) => `${k}: ${v}`).join("\n");
+  const baseText = rows.map(([k, v]) => `${k}: ${v}`).join("\n");
+  const textBody = hasVal(salesConsultantVal)
+    ? `${baseText}\nSalesConsultant: ${salesConsultantVal}`
+    : baseText;
+
   const subject = `New Trade-In Lead – ${data.year || ""} ${data.make || ""} ${data.model || ""}`.replace(/\s+/g, " ").trim();
 
   return { subject, htmlBody, textBody };
@@ -154,9 +182,6 @@ async function processAttachments(files) {
       totalSize += size;
 
       return {
-        // *** THIS IS THE FIX ***
-        // The original code had `Buffer.from(buffer)`, which is incorrect.
-        // `buffer` is already a Buffer, so we just need to Base64-encode it.
         content: buffer.toString("base64"),
         filename: file.filename,
         type: file.type || "application/octet-stream",
@@ -169,7 +194,7 @@ async function processAttachments(files) {
   });
 
   const results = await Promise.all(fetchPromises);
-  return results.filter(Boolean); // Filter out any nulls from failed fetches/skips
+  return results.filter(Boolean);
 }
 
 /**
@@ -195,7 +220,6 @@ async function triggerBackupWebhook(data, files) {
       body: JSON.stringify(lead),
     });
   } catch (error) {
-    // Log but do not fail the function if the backup fails
     console.warn("Backup webhook failed:", error);
   }
 }
