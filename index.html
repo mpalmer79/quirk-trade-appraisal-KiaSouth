@@ -7,6 +7,16 @@
 <meta content="noindex" name="robots"/>
 <link href="https://vpic.nhtsa.dot.gov" rel="preconnect"/>
 <link href="assets/styles.css?v=2" rel="stylesheet"/>
+
+<!-- Helper to ensure the Sales Consultant row spans both columns (works with grid or flex layouts) -->
+<style>
+  /* If your .row uses CSS Grid, this spans both columns */
+  .row .full-span { grid-column: 1 / -1; }
+  /* If your .row uses Flexbox, this forces full width */
+  .row .full-span { width: 100%; }
+  /* Ensure the input stretches full width like the others */
+  .row .full-span input[type="text"] { width: 100%; }
+</style>
 </head>
 <body>
 <!-- 
@@ -69,9 +79,9 @@
       </div>
     </div>
 
-    <!-- Sales Consultant (full-width row, matching Marshfield placement) -->
+    <!-- Sales Consultant (full-width row, same placement/appearance as Marshfield) -->
     <div class="row">
-      <div style="grid-column: 1 / -1;">
+      <div class="full-span">
         <label for="salesConsultant"><strong>Who is your sales consultant?</strong></label>
         <input id="salesConsultant" name="salesConsultant" type="text" placeholder="Who have you been working with?"/>
       </div>
