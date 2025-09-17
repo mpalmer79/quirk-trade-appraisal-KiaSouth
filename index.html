@@ -7,6 +7,34 @@
 <meta content="noindex" name="robots"/>
 <link href="https://vpic.nhtsa.dot.gov" rel="preconnect"/>
 <link href="assets/styles.css?v=2" rel="stylesheet"/>
+
+<!-- Mobile-only header fix: stack logo above title and center both -->
+<style>
+  @media (max-width: 640px) {
+    .header-title{
+      display:flex;              /* ensure we can stack cleanly on phones */
+      flex-direction:column;     /* logo on top, title under it */
+      align-items:center;        /* center horizontally */
+      text-align:center;         /* center the title text */
+      gap:10px;
+    }
+    .header-title .branding{
+      width:100%;
+      display:flex;
+      justify-content:center;    /* center the green QUIRK logo */
+      margin:0;
+    }
+    #quirkBrand{
+      margin:0 auto;             /* center the branding block */
+      max-width:220px;           /* keep the logo from getting huge */
+    }
+    .header-title h1{
+      margin:0;                  /* tighten spacing under the logo */
+      text-align:center;
+      line-height:1.2;
+    }
+  }
+</style>
 </head>
 <body>
 <!-- 
@@ -172,25 +200,18 @@
   <fieldset class="section">
     <legend class="visually-hidden">Vehicle Condition</legend>
     <h2 data-i18n="vehCondition">Tell us about your Vehicle</h2>
-
     <label data-i18n="warnings" for="warnings">Any warning lights on dashboard?</label>
     <select id="warnings" name="warnings"><option>No</option><option>Yes</option></select>
-
     <label data-i18n="mech" for="mech">Mechanical issues</label>
     <textarea id="mech" name="mech" rows="3"></textarea>
-
     <label data-i18n="cosmetic" for="cosmetic">Cosmetic issues</label>
     <textarea id="cosmetic" name="cosmetic" rows="3"></textarea>
-
     <label data-i18n="interior" for="interior">Interior clean and damage-free?</label>
     <textarea id="interior" name="interior" rows="2"></textarea>
-
     <label data-i18n="mods" for="mods">Aftermarket parts or modifications?</label>
     <textarea id="mods" name="mods" rows="2"></textarea>
-
     <label data-i18n="smells" for="smells">Unusual smells?</label>
     <textarea id="smells" name="smells" rows="2"></textarea>
-
     <label data-i18n="service" for="service">Routine services up to date?</label>
     <textarea id="service" name="service" rows="2"></textarea>
   </fieldset>
