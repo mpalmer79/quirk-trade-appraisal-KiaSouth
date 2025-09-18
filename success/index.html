@@ -19,10 +19,19 @@
     main.success-card {
       max-width: 720px;
       margin: 40px auto;
-      background: #fff;                     /* will be overridden on desktop */
+      background: #fff;                     /* overridden below for mobile + desktop */
       padding: 24px;
       border-radius: 12px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    /* MOBILE ONLY: move card up & set card opacity to 0.50 */
+    @media (max-width: 640px) {
+      main.success-card {
+        margin: 12px auto 24px;             /* small breathing room from top */
+        background: rgba(255,255,255,0.50); /* 50% white */
+        backdrop-filter: blur(1px);
+      }
     }
 
     /* Desktop/tablet ONLY: center card on page & make it 50% opaque */
