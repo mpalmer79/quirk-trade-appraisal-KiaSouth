@@ -5,18 +5,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title data-i18n="successTitle">Thanks! - Quirk Kia South</title>
   <link rel="stylesheet" href="/assets/styles.css" />
+
+  <style>
+    /* Watermark background — image at ~20% strength (0.80 overlay) */
+    body.success {
+      min-height: 100vh;
+      background:
+        linear-gradient(rgba(255,255,255,.80), rgba(255,255,255,.80)),
+        url('/assets/quirk-lot.png') center / cover no-repeat fixed;
+    }
+
+    /* Default card (mobile-first) */
+    main.success-card {
+      max-width: 720px;
+      margin: 40px auto;
+      background: #fff;                     /* will be overridden on desktop */
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    /* Desktop/tablet ONLY: center card on page & make it 50% opaque */
+    @media (min-width: 641px) {
+      body.success {
+        display: flex;
+        align-items: center;                /* vertical centering */
+        justify-content: center;            /* horizontal centering */
+        padding: 40px 16px;                 /* breathing room */
+      }
+      main.success-card {
+        margin: 0;                          /* flex takes care of centering */
+        background: rgba(255,255,255,0.50); /* 50% white */
+        backdrop-filter: blur(1px);         /* subtle polish (supported browsers) */
+      }
+    }
+  </style>
 </head>
-<body
-  style="
-    min-height:100vh;
-    /* Subtle watermark background */
-    background:
-      linear-gradient(rgba(0,0,0,.18), rgba(0,0,0,.18)),
-      url('/assets/quirk-lot.png') center / cover no-repeat fixed;
-  "
->
-  <main style="max-width:720px;margin:40px auto;background:#fff;padding:24px;
-               border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,0.1)">
+<body class="success">
+  <main class="success-card">
     <h1 style="text-align:center;margin:0 0 10px;color:#004a2f" data-i18n="successHeading">
       Thank you!
     </h1>
